@@ -1,6 +1,7 @@
 package load
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"log"
@@ -233,6 +234,7 @@ func download(f *FileStruct, w *sync.WaitGroup) {
 		fmt.Fprintln(os.Stderr, err)
 		return
 	}
+	b := bufio.NewReader(response.Body)
 	defer response.Body.Close()
 
 	file, err := os.Create("temp\\" + f.name)
@@ -242,7 +244,7 @@ func download(f *FileStruct, w *sync.WaitGroup) {
 	}
 	defer file.Close()
 	d := &DownloadContent{
-		reader: response.Body,
+		reader: b,
 		total:  int64(f.length),
 	}
 	io.Copy(file, d)
