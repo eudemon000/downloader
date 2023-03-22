@@ -2,6 +2,7 @@ package main
 
 import (
 	"downloader/load"
+	"downloader/log"
 	"image/color"
 
 	"fyne.io/fyne/v2"
@@ -11,6 +12,8 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 )
+
+var l *log.Log = log.New()
 
 func (d *DownApp) makeUI() fyne.CanvasObject {
 	top := d.createTop()
@@ -40,6 +43,7 @@ func (d *DownApp) createLeft() fyne.CanvasObject {
 		return widget.NewLabel("")
 	}, func(lii widget.ListItemID, co fyne.CanvasObject) {
 		co.(*widget.Label).SetText(middleItemText[lii])
+		l.PrintMulti("aaa")
 	})
 	abc := container.NewMax(l)
 	lb := container.New(layout.NewMaxLayout(), leftBackground, abc)

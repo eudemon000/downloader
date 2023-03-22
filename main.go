@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"html/template"
 	"image/color"
-	"log"
 	"net/http"
 	"os"
 	"sync"
@@ -26,8 +25,6 @@ type DownApp struct {
 	pathItem      *widget.FormItem
 	pathEntry     *widget.Entry
 	newTaskDialog *dialog.Dialog
-	dataLog       *log.Logger
-	errLog        *log.Logger
 }
 
 var d *DownApp
@@ -39,10 +36,7 @@ var middleItemText = []string{"Downloading", "Waiting", "Stop"}
 func main() {
 	//webMode()
 	//consoleMode()
-	d = &DownApp{
-		dataLog: log.New(os.Stdout, "SUCCESS ", log.Ldate|log.Ltime|log.Lshortfile),
-		errLog:  log.New(os.Stderr, "FAIL ", log.Ldate|log.Ltime|log.Lshortfile|log.Lmsgprefix),
-	}
+	d = &DownApp{}
 	//d.guiMode1()
 	d.gui()
 	//guiMode()
@@ -236,13 +230,4 @@ func (d *DownApp) gui() {
 	d.mainWindow = &window
 	window.SetContent(contentLayout)
 	window.ShowAndRun()
-}
-
-func (d *DownApp) log(str string) {
-	d.dataLog.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
-	d.dataLog.Println(str)
-}
-
-func (d *DownApp) err(str string) {
-	d.errLog.Println(str)
 }
