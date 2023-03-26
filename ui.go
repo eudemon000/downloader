@@ -13,6 +13,18 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+type DownListItem struct {
+	name        *widget.Label
+	progressBar *widget.ProgressBar
+	speed       *widget.Label
+}
+
+type DownListItemData struct {
+	name    string
+	current float64
+	speen   float64
+}
+
 var l *log.Log = log.New()
 
 func (d *DownApp) makeUI() fyne.CanvasObject {
@@ -37,21 +49,33 @@ func (d *DownApp) createTop() fyne.CanvasObject {
 func (d *DownApp) createLeft() fyne.CanvasObject {
 	leftBackground := canvas.NewRectangle(color.RGBA{244, 245, 247, 255})
 	leftBackground.SetMinSize(fyne.Size{Width: 200, Height: 0})
-	l := widget.NewList(func() int {
+	lists := widget.NewList(func() int {
 		return len(middleItemText)
 	}, func() fyne.CanvasObject {
 		return widget.NewLabel("")
 	}, func(lii widget.ListItemID, co fyne.CanvasObject) {
 		co.(*widget.Label).SetText(middleItemText[lii])
-		l.PrintMulti("aaa")
+
+		l.PrintMulti("aaa, %d", lii)
 	})
-	abc := container.NewMax(l)
+	lists.OnSelected = func(id widget.ListItemID) {
+		l.PrintMulti("OnSelected, %d", id)
+	}
+	abc := container.NewMax(lists)
 	lb := container.New(layout.NewMaxLayout(), leftBackground, abc)
 	return lb
 }
 
 func (d *DownApp) createMiddle() fyne.CanvasObject {
-	return widget.NewLabel("middle")
+	s := []*fyne.Container{}
+	for i := 0; i < 10; i++ {
+		d1 := DownListItem{}
+		c := d1.listItemContainer()
+		s = append(s, c)
+	}
+
+	l := d.lll(s)
+	return l
 }
 
 func (d *DownApp) newDialog() func() {
@@ -75,4 +99,30 @@ func (d *DownApp) newDialog() func() {
 		d.newTaskDialog = &dl
 		dl.Show()
 	}
+}
+
+func (d *DownApp) lll(item []*fyne.Container) *fyne.Container {
+	l := widget.NewList(func() int {
+		return len(item)
+	}, func() fyne.CanvasObject {
+		dl := &DownListItem{}
+		return dl.listItemContainer()
+	}, func(lii widget.ListItemID, co fyne.CanvasObject) {
+		item := item[lii]
+		_ = item
+		// item.name.SetText("aaa")
+		// item.progressBar.SetValue(50)
+		// item.speed.SetText("500k")
+		l.PrintlnConsole(co.(*fyne.Container).Objects)
+	})
+	a := container.New(layout.NewMaxLayout(), l)
+	return a
+}
+
+func (d DownListItem) listItemContainer() *fyne.Container {
+	d.name = widget.NewLabel("File name")
+	d.progressBar = widget.NewProgressBar()
+	d.speed = widget.NewLabel("Speed")
+	c := container.NewVBox(d.name, d.progressBar, d.speed)
+	return c
 }
