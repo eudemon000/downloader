@@ -114,6 +114,38 @@ func (d *DownApp) lll(item []*fyne.Container) *fyne.Container {
 		// item.progressBar.SetValue(50)
 		// item.speed.SetText("500k")
 		l.PrintlnConsole(co.(*fyne.Container).Objects)
+		aaa := co.(*fyne.Container).Objects
+		for k, v := range aaa {
+			//aa, ok := interface{}(v).(widget.Label)
+			//l.PrintlnConsole(k, " ", v, " ", aa., " ", ok)
+			l.PrintlnConsole(k, v)
+			// if k == 0 {
+			// 	aa, _ := interface{}(v).(widget.Label)
+			// 	aa.SetText("aaa")
+			// 	aa.Refresh()
+			// } else if k == 1 {
+			// 	aa, _ := interface{}(v).(widget.ProgressBar)
+			// 	aa.SetValue(500)
+			// 	aa.Refresh()
+			// } else {
+			// 	aa, _ := interface{}(v).(widget.Label)
+			// 	aa.SetText("100M/s")
+			// 	aa.Refresh()
+			// }
+			if k == 0 {
+				aa, _ := v.(*widget.Label)
+				aa.SetText("aaa")
+				aa.Refresh()
+			} else if k == 1 {
+				aa, _ := v.(*widget.ProgressBar)
+				aa.SetValue(50)
+				aa.Refresh()
+			} else {
+				aa, _ := v.(*widget.Label)
+				aa.SetText("100M/s")
+				aa.Refresh()
+			}
+		}
 	})
 	a := container.New(layout.NewMaxLayout(), l)
 	return a
@@ -122,6 +154,8 @@ func (d *DownApp) lll(item []*fyne.Container) *fyne.Container {
 func (d DownListItem) listItemContainer() *fyne.Container {
 	d.name = widget.NewLabel("File name")
 	d.progressBar = widget.NewProgressBar()
+	d.progressBar.Min = 0
+	d.progressBar.Max = 100
 	d.speed = widget.NewLabel("Speed")
 	c := container.NewVBox(d.name, d.progressBar, d.speed)
 	return c

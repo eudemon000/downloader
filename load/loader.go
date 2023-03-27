@@ -2,14 +2,16 @@ package load
 
 import (
 	"bufio"
+	"downloader/ddb"
+	"downloader/log"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 // 默认协程下载数量
@@ -40,6 +42,15 @@ type FileName interface {
 	CreateName()
 }
 
+type DownloadInfo struct {
+	Url      string
+	Name     string
+	SavePath string
+	Length   int64
+}
+
+var l *log.Log = log.New()
+
 func (read *Read) Read(p []byte) (n int, err error) {
 	n, err = read.Reader.Read(p)
 	read.current += int64(n)
@@ -52,12 +63,12 @@ func (read *Read) Read(p []byte) (n int, err error) {
 func Run(url string) error {
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Fatal(err)
+		l.PrintMulti(err)
 	}
 	defer resp.Body.Close()
 	s, isExist := createName(*resp)
 	if !isExist {
-		log.Fatal("不存在")
+		l.PrintMulti("不存在")
 	}
 	file, err := os.Create(s)
 	r := &Read{
@@ -65,7 +76,7 @@ func Run(url string) error {
 		total:  resp.ContentLength,
 	}
 	if err != nil {
-		log.Fatal(err)
+		l.PrintMulti(err)
 	}
 	defer file.Close()
 	io.Copy(file, r)
@@ -146,6 +157,7 @@ func Header(url string) {
 		fmt.Fprintln(os.Stderr, "不支持的下载类型")
 		return
 	}
+
 	name := getName(*respone)
 	length := header.Get("content-length")
 	contentLength, _ := strconv.Atoi(length)
@@ -170,6 +182,16 @@ func Header(url string) {
 		}
 		fmt.Fprintf(os.Stdout, "start:%d, end:%d\n", f.start, f.end)
 		end++
+		tb := ddb.TaskBean{
+			Name:        f.name,
+			Url:         f.url,
+			Create_time: time.Now().String(),
+		}
+		id, err := ddb.InsertDB(tb)
+		if err != nil {
+			l.PrintMulti(err)
+		}
+		l.PrintMulti(id)
 		go download(f, &w)
 		w.Add(1)
 	}
